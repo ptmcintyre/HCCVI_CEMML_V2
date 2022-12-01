@@ -17,14 +17,14 @@ future_name<-paste0("LOCA_", GCM,"_rcp85")
 
 #####define inputs- location for all biovars by year from 1950-2100 for a single GCM
 biovars_yearly<-"S:/Projects/SCCASC_HCCVI/HCCVI_SCCASC_R_Project/process_initial_climate_data/biovars_yearWGS84"
-#list.files(biovars_yearly)# check that location is correct
+list.files(biovars_yearly)# check that location is correct
 
 ###define output locations
-historic_out<-"S:/Projects/SCCASC_HCCVI/HCCVI_SCCASC_R_Project/process_initial_climate_data/bio_vars_normals/historic/"
+historic_out<-"S:/Projects/CEMML_HCCVI/CEMML_v2_Rproject/HCCVI_CEMML_V2/process_initial_climate_data/"
 historic_out<- paste0(historic_out, GCM)
 dir.create(historic_out)
 
-future_out<-"S:/Projects/SCCASC_HCCVI/HCCVI_SCCASC_R_Project/process_initial_climate_data/bio_vars_normals/future/"
+future_out<-"S:/Projects/CEMML_HCCVI/CEMML_v2_Rproject/HCCVI_CEMML_V2/process_initial_climate_data/"
 future_out<-paste0(future_out, GCM)
 dir.create(future_out)
 
@@ -45,11 +45,11 @@ bio.yearly<-list.files(biovars_yearly, pattern=bio_names[i], full.names = T)
 #pull out historical files
 bio.target<-list.files("S:/Projects/SCCASC_HCCVI/HCCVI_SCCASC_R_Project/process_initial_climate_data/biovars_yearWGS84", pattern="historical", full.names = T)
 bio_years<-bio.yearly[bio.yearly%in%bio.target]
-bio_stack<-rast(c(bio_years[1:31])) ###1:31 corresponds to 1950-1980
+bio_stack<-rast(c(bio_years[27:56])) ###1:31 corresponds to 1950-1980
 #names(bio_stack)# can check that years are correct
 bio_stack_mean<-mean(bio_stack) #average accross years
 
-writeRaster(bio_stack_mean, paste0(historic_out,"/", historic_name, "_1950_1980_", bio_names[i]), overwrite=TRUE)
+writeRaster(bio_stack_mean, paste0(historic_out,"/", historic_name, "_1976_2005_", bio_names[i]), overwrite=TRUE)
 
 }
 
@@ -64,11 +64,11 @@ for (i in 1:19){
   #pull out future files
   bio.target<-list.files(biovars_yearly, pattern="rcp85", full.names = T)
   bio_years<-bio.yearly[bio.yearly%in%bio.target]
-  bio_stack<-rast(c(bio_years[10:40])) ###1:31 corresponds to 2015-2045
+  bio_stack<-rast(c(bio_years[30:59])) ###1:31 corresponds to 2015-2045
   #names(bio_stack)# can check that years are correct
   bio_stack_mean<-mean(bio_stack) #average accross years
   
-  writeRaster(bio_stack_mean, paste0(future_out,"/", future_name, "_2015_2045_", bio_names[i]), overwrite=TRUE)
+  writeRaster(bio_stack_mean, paste0(future_out,"/", future_name, "_2035_2064_", bio_names[i]), overwrite=TRUE)
   
 }
 

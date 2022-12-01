@@ -20,11 +20,11 @@ GCM<- "CCSM4"   #enter name of GCM to include with file
 
 ##concatenate GCM name with other info, don't change
 historic_name<-paste0("LOCA_", GCM,"_historical")
-future_name<-paste0("LOCA_", GCM,"_rcp85")
+future_name<-paste0("LOCA_", GCM,"_rcp45")
 
 ##define output base location, will add on GCM name
 #all files from a GCM for both historic and future will go to a single folder)
-base_out<-"S:/Projects/SCCASC_HCCVI/HCCVI_SCCASC_R_Project/process_initial_climate_data/biovars_yearWGS84/"
+base_out<-"S:/Projects/CEMML_HCCVI/CEMML_v2_Rproject/HCCVI_CEMML_V2/process_initial_climate_data/biovars_year/"
 output_loc<- paste0(base_out, GCM)
 dir.create(output_loc)
 
@@ -32,8 +32,8 @@ dir.create(output_loc)
 #update location of historic and future (rcp85) monthly climate files. Should have just one GCM worths of files at a time here
 #files should be precip/tmin/tmax for all years in historic(1950-2005) and future (2006-2100) in separate folders (could be updated to single)
 
-historic_monthly<-"S:/Projects/SCCASC_HCCVI/HCCVI_SCCASC_R_Project/process_initial_climate_data/monthly_vals_year/test/historic"
-future_monthly<-"S:/Projects/SCCASC_HCCVI/HCCVI_SCCASC_R_Project/process_initial_climate_data/monthly_vals_year/test/future"
+historic_monthly<-"S:/Projects/CEMML_HCCVI/CEMML_v2_Rproject/HCCVI_CEMML_V2/process_initial_climate_data/monthly_vals_year/test/historic"
+future_monthly<-"S:/Projects/CEMML_HCCVI/CEMML_v2_Rproject/HCCVI_CEMML_V2/process_initial_climate_data/monthly_vals_year/test/future/rcp45"
 
 # shouldn't change- define years of interest for all historic and future years
 historic_years<-seq(1950,2005, 1)

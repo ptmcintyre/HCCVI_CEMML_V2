@@ -21,18 +21,18 @@ library(terra)  #newer appraoch to rasters from the "raster package" team
 GCM<- "CCSM4"   #enter name of GCM to include with file
 
 #define hist file locations, update to reflect correct GCM 
-hist.pr.files<-list.files("T:/LOCA/CCSM4/historical/pr/", full.names = T)
-hist.tmin.files<-list.files("T:/LOCA/CCSM4/historical/tasmin/", full.names = T)
-hist.tmax.files<-list.files("T:/LOCA/CCSM4/historical/tasmax/", full.names = T)
+hist.pr.files<-list.files("T:/LOCA_historical/pr/", full.names = T)
+hist.tmin.files<-list.files("T:/LOCA_historical/tasmin/", full.names = T)
+hist.tmax.files<-list.files("T:/LOCA_historical/tasmax/", full.names = T)
 
 #define rc85 file locations
-rcp85.pr.files<-list.files("T:/LOCA/CCSM4/rcp85/pr/", full.names = T)
-rcp85.tmin.files<-list.files("T:/LOCA/CCSM4/rcp85/tasmin/", full.names = T)
-rcp85.tmax.files<-list.files("T:/LOCA/CCSM4/rcp85/tasmax/", full.names = T)
+rcp85.pr.files<-list.files("T:/LOCA_ccsm4_rcp45/pr/", full.names = T)
+rcp85.tmin.files<-list.files("T:/LOCA_ccsm4_rcp45/tasmin/", full.names = T)
+rcp85.tmax.files<-list.files("T:/LOCA_ccsm4_rcp45/tasmax/", full.names = T)
 
 ##define output base location
-historic_out<- "S:/Projects/SCCASC_HCCVI/HCCVI_SCCASC_R_Project/process_initial_climate_data/monthly_vals_year/test/historic"
-future_out<- "S:/Projects/SCCASC_HCCVI/HCCVI_SCCASC_R_Project/process_initial_climate_data/monthly_vals_year/test/future"
+historic_out<- "S:/Projects/CEMML_HCCVI/CEMML_v2_Rproject/HCCVI_CEMML_V2/process_initial_climate_data/monthly_vals_year/test/historic"
+future_out<- "S:/Projects/CEMML_HCCVI/CEMML_v2_Rproject/HCCVI_CEMML_V2/process_initial_climate_data/monthly_vals_year/test/future"
 dir.create(historic_out) #creates directory if doesn't exist
 dir.create(future_out) #creates directory if doesn't exist
 
@@ -43,7 +43,7 @@ future_years<-seq(2006,2100, 1)
 
 ##concatenate GCM name with other info, don't change
 historic_name<-paste0("LOCA_", GCM,"_Monthly_historical")
-future_name<-paste0("LOCA_", GCM,"_Monthly_rcp85")
+future_name<-paste0("LOCA_", GCM,"_Monthly_rcp45")
 
 loca.template<-raster(hist.pr.files[1]) #selecting first file to act as a template for both hist and futre (proj, coords, cells)
 #nc_data <- nc_open(hist.pr.files[1]) #to explore one netcdf file
