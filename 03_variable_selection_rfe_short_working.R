@@ -5,14 +5,14 @@
 # variables in the presence of correlation) for all CONUS BLM veg types,
 # using variable importance as the elimination criterion.
 
+chooseCRANmirror()
 ##To install ecoclim 02/17/2021
 #install.packages("remotes")
 #remotes::install_github("matthewkling/ecoclim") 
 
-
-
 library(ecoclim)
 library(raster)
+library(terra)
 library(ggplot2)
 library(dismo)
 library(doParallel)
@@ -23,20 +23,29 @@ library(mgcv)
 library(randomForest)
 library(here)
 here()
+
 # load climate data
 gc()
-historic.biovars<-list.files(here("process_initial_climate_data/bio_vars_normals/historic"), pattern=".tif")
+historic.biovars<-list.files(here("biovars/historic"), pattern=".tif")
 historic.biovars
-#dd <- stack(here("biovars/historic", historic.biovars)) 
-dd <- stack(here("process_initial_climate_data/bio_vars_normals/historic", historic.biovars)) 
+dd <- stack(here("biovars/historic", historic.biovars)) 
+#dd <- stack(here("process_initial_climate_data/bio_vars_normals/historic", historic.biovars)) 
 names(dd) <- sort(paste0("bio", 1:19))
 dd[[19]]
 
 # load veg data
 #paths <- parseMetadata("I:/projects/BLM/Production/type_specific/veg_distributions/PRISM_800m/rasters")
-veg_rasters<- list.files(here("system_distributions/LOCA_rasters"), pattern=".tif")
-veggies <- raster::stack(here("system_distributions/LOCA_rasters", veg_rasters))
-names(veggies)
+veg_rasters<- list.files(here("group_distributions/LOCA_rasters"), pattern=".tif") #drops=c("xml", ".dbf", ".ovr", ".cpg"))
+#veggies <- raster::stack(here("group_distributions/LOCA_rasters", veg_rasters))
+veggies <- stack(here("group_distributions/LOCA_rasters", veg_rasters[c(4,9:12,14,22,25,26,28)])) #first 10 groups for CEMML Phase II
+veggies <- stack(here("group_distributions/LOCA_rasters", veg_rasters[c(4,10,12,22,26)]))
+#veggies<- raster(here("group_distributions/LOCA_rasters", veg_rasters[14])) #MLLPFWSW re-do
+veggies@layers
+#names(veggies)<-c("Central_Great_Plains_Mixedgrass_Prairie", "Cross_Timbers_Forest_and_Woodland", "Dry_Mesic_Loamy_Longleaf_Pine_Woodland", "Great_Basin_Pinyon_Juniper_Woodland", "Great_Plains_Shortgrass_Prairie", "Mesic_Longleaf_Pine_Flatwoods_Spodosol_Woodland", "Southern_Mesic_Beech_Magnolia_Oak_Forest", "Western_Gulf_Coastal_Plain_Pine_Oak_Forest_and_Woodland", "Southern_Great_Plains_Sand_Grassland_and_Shrubland", "Xeric_Longleaf_Pine_Woodland")
+names(veggies)<-c("Central_Great_Plains_Mixedgrass_Prairie", "Dry_Mesic_Loamy_Longleaf_Pine_Woodland", "Great_Plains_Shortgrass_Prairie",  "Southern_Mesic_Beech_Magnolia_Oak_Forest", "Southern_Great_Plains_Sand_Grassland_and_Shrubland")
+#names(veggies)<-c("Cross_Timbers_Forest_and_Woodland", "Great_Basin_Pinyon_Juniper_Woodland", "Western_Gulf_Coastal_Plain_Pine_Oak_Forest_and_Woodland", "Xeric_Longleaf_Pine_Woodland")
+#names(veggies)<-"Mesic_Longleaf_Pine_Flatwoods_Spodosol_Woodland"
+
 
 
 # this function fits a random forest model to a set of training data, 
@@ -61,7 +70,7 @@ nichefit <- function(mtry, nodesize, # randomForest params
       # fit model
       form <- paste0("as.factor(occurrence) ~ ", paste(vars, collapse=" + "))
       set.seed(rep)
-      fit <- randomForest(as.formula(form), data=na.omit(train), ntree=500, mtry=mtry, nodesize=nodesize)
+      fit <- randomForest(as.formula(form), data=na.omit(train), ntree=300, mtry=mtry, nodesize=nodesize)
       
       # predictions for evaluation data
       if(is.null(dim(climate_matrix))){
@@ -77,21 +86,23 @@ nichefit <- function(mtry, nodesize, # randomForest params
       evaluate(p=as.vector(eval_pres), a=as.vector(eval_abs))@auc
 }
 
-# detectCores()
-# cpus <- 12
-# cl <- makeCluster(cpus)
-# registerDoParallel(cl)
+detectCores()
+cpus <- 5
+cl <- makeCluster(cpus)
+registerDoParallel(cl)
 
 #foreach(i=1:length(names(veggies)) %dopar% 
+#for(type in names(veggies))
 i=1
 
-for(type in names(veggies)) {
-      #type <- names(veggies)[5]
+foreach(i=1:length(names(veggies)), .packages=c("raster", "ecoclim", "ggplot2" ,
+                                                "dismo","dplyr", "tidyr","caret", "mgcv", "randomForest","here")) %dopar% {
+      type <- names(veggies)[i]
       #type <- "Southern_Rocky_Mountain_Juniper_Woodland_and_Savanna"
       
       # slave coordination
       #outfile <- paste0("I:/projects/BLM/Production/type_specific/variable_selection/conus/rfe_results/rfe_", type, ".rds")
-      outfile <- paste0("S:/Projects/SCCASC_HCCVI/HCCVI_SCCASC_R_Project/type_specific_modeling/variable_selection/rfe_results/rfe_", type, ".rds")
+      outfile <- paste0("S:/Projects/CEMML_HCCVI/CEMML_v2_Rproject/HCCVI_CEMML_V2/type_specific_modeling/variable_selection/rfe_results/rfe_5reps_", type, ".rds")
       if(file.exists(outfile)) next()
       saveRDS(type, outfile)
       print(type)
@@ -99,8 +110,8 @@ for(type in names(veggies)) {
       ### restructure veg data
       veg <- subset(veggies, type)
       #veg<-veggies[[i]]
-      veg <- trimFast(extend(veg, 2))
-      
+      veg <- trim(veg, padding=2) #padding might need to be 4 for Mesic LL Pine 
+      #veg <- crop(veg, dd)
       
       ### climate data prep
       climate <- crop(dd, veg) 
@@ -127,6 +138,7 @@ for(type in names(veggies)) {
       
       ### set up progress bar
       cullreps <- 19; repreps <- 5; splitreps <- 4 #original 19, 20, 8 
+      #cullreps <- 19; repreps <- 3; splitreps <- 4 #original 19, 20, 8 #changed from 5 to 3 reps on November 2022
       pb1 <- txtProgressBar(min = 0, max = cullreps*repreps*splitreps, style = 3)
       k <- 0
       
@@ -137,10 +149,10 @@ for(type in names(veggies)) {
             climate <- subset(climate, vrs)
             clim <- clim[,vrs] 
             
-            ### repeat randomized processes (selection of traning/evaluation points, RF model, etc) to reduce noise -- RFE variance is high
-            for(rep in 1:5){
-                  
-                  ### spatial block cross validation: define folds and then loop through them
+            ### repeat randomized processes (selection of training/evaluation points, RF model, etc) to reduce noise -- RFE variance is high
+            for(rep in 1:5)
+            #for(rep in 1:3) #changed from 5 to 3 reps on November 2022
+              {### spatial block cross validation: define folds and then loop through them
                   xsplits <- quantile(pres$x)
                   ysplits <- quantile(pres$y)
                   for(split in 1:6){

@@ -12,13 +12,15 @@ library(rasterDT)
 library(here)
 library(doParallel)
 library(terra)
+here()
 
 #Read in CSV with names and numbers for target systems
-target_systems<-read.csv(here("system_distributions/SCASC_systems.csv"), as.is=T)
+target_systems<-read.csv(here("group_distributions/CEMML_systems.csv"), as.is=T)
 #following line reads table to select only new adds (for adding in systems)
 target_systems<-subset(target_systems, current_add=="yes")
 map_values<-target_systems$NS.Map.Value.code
 map_values<-unique(map_values)
+
 
 #map_values<-c("7132", "7421")
 #i=2

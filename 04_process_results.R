@@ -7,12 +7,19 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(corrplot)
+library(here)
 
 # open rfe data
 d <- list.files(here("type_specific_modeling/variable_selection/rfe_results"), full.names=T)
 d <- d[grepl(".rds", d)]
-#d<-d[c(1,14 )]
-## VARIABLE RANKS ###############################
+#d<-d[2]
+check.1<-readRDS("S:/Projects/CEMML_HCCVI/CEMML_v2_Rproject/HCCVI_CEMML_V2/type_specific_modeling/variable_selection/rfe_results/rfe_5reps_Mesic_Longleaf_Pine_Flatwoods_Spodosol_Woodland.rds")
+check.2<-readRDS("S:/Projects/CEMML_HCCVI/CEMML_v2_Rproject/HCCVI_CEMML_V2/type_specific_modeling/variable_selection/rfe_results/rfe_5reps_Western_Gulf_Coastal_Plain_Pine_Oak_Forest_and_Woodland.rds")
+check.3<-readRDS("S:/Projects/CEMML_HCCVI/CEMML_v2_Rproject/HCCVI_CEMML_V2/type_specific_modeling/variable_selection/rfe_results/rfe_Western_Gulf_Coastal_Plain_Pine_Oak_Forest_and_Woodland.rds")
+check.4<-readRDS("S:/Projects/CEMML_HCCVI/CEMML_v2_Rproject/HCCVI_CEMML_V2/type_specific_modeling/variable_selection/rfe_results/rfe_5reps_Xeric_Longleaf_Pine_Woodland.rds")
+check.5<-readRDS("S:/Projects/CEMML_HCCVI/CEMML_v2_Rproject/HCCVI_CEMML_V2/type_specific_modeling/variable_selection/rfe_results/rfe_Xeric_Longleaf_Pine_Woodland.rds")
+
+##### VARIABLE RANKS ###############################
 
 culls <- lapply(d, function(x) {
       x <- readRDS(x)
@@ -58,7 +65,7 @@ tculls <- culls %>%
       arrange(type, desc(rank))
 
 write.csv(tculls, 
-          here("type_specific_modeling/variable_selection/variable_importance.csv"),
+          here("type_specific_modeling/variable_selection/variable_importance_11302022.csv"),
           row.names=F)
 
 
